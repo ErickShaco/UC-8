@@ -1,42 +1,34 @@
-import { View, FlatList } from 'react-native';
-import ContactCard from '../components/ContactCard';
-import ContactDetails from './Information';
-import { contactList } from '../constants/data.js'
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, FlatList } from "react-native";
+import ContactCard from "../components/ContactCard";
+import ContactDetails from "./Information";
+import { contactList } from "../constants/data";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import styles from "../styles/styles";
 
 const Stack = createNativeStackNavigator();
 
-function ContactListenScreen({navigation}) {
-    return (
-
-    <View>
-        <FlatList>
-            data = {contactList},
-            keyExtractor = {(item) => item.id}
-            renderItem={({ item }) => (
-                <ContactCard item = { item } onPresse = { navigation.navigate('Detalhes', { item })}> </ContactCard>
-            )}
-
-        </FlatList>
+function ContactListScreen({ navigation }) {
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={contactList}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <ContactCard
+            item={item}
+            onPress={() => navigation.navigate("Detalhes", { item })}
+          />
+        )}
+      />
     </View>
-
-    )
+  );
 }
 
 export default function Contacts() {
-    return (
-        <Stack.Navigator>
-
-            <Stack.Screen
-                name='Lista de Pokemons'
-                component={ContactListenScreen}
-            />
-            
-
-            <Stack.Screen
-                name=''
-            />
-
-        </Stack.Navigator>
-    )
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Lista de Pokemons" component={ContactListScreen} />
+      <Stack.Screen name="Detalhes" component={ContactDetails} />
+    </Stack.Navigator>
+  );
 }

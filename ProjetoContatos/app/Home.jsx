@@ -9,7 +9,7 @@ export default function Home() {
         <View style={styles.subContainer}>
             <Image 
             style={styles.image}
-            source={require('../assets/images/Pokebola-pokeball-png-0.png')}/>
+            source={require('../assets/images/pokebola.png')}/>
 
                 <Text style={styles.title}> Bem Vindo ao App de Pokemon </Text>
 

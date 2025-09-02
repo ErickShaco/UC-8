@@ -3,6 +3,7 @@ export const contactList = [{
     name: 'Pikachu',
     type: 'Eletrico',
     Evolution: 'Raichu',
+    info: 'pavio curto',
     photo: require('../assets/images/025.png')
 },
 {
@@ -10,6 +11,7 @@ export const contactList = [{
     name: 'Bulbasaur',
     type: 'Planta/Venenoso',
     Evolution: 'Ivysaur',
+    info: 'ama andar em grupos',
     photo: require('../assets/images/bulbasaur.jpg')
 },
 {
@@ -17,5 +19,6 @@ export const contactList = [{
     name: 'Charizard',
     type: 'Fogo/Voador',
     Evolution: 'Sem Evolução',
+    info: 'Odeia ser contrariado',
     photo: require('../assets/images/charizard.png')  
 }]
