@@ -47,13 +47,21 @@ export default StyleSheet.create({
     backgroundColor: "#1c2541",
     borderRadius: 12,
     padding: 12,
+    flex: 1,
+    flexDirection: "row",
+    marginTop: 10,
   },
 
   cardText: {
     color: "#fff",
     fontSize: 16,
+    flex: 1,
+    flexDirection: "row",
   },
-
+  iconEdit: {
+    textAlign: "right",
+    marginLeft: 15,
+  },
   muted: {
     color: "#cbd5e1",
     textAlign: "center",

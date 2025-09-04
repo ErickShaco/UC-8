@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,13 @@ import {
   FlatList,
   Alert,
   Keyboard,
+  Modal,
+  Animated,
+  Button,
+  Easing,
 } from "react-native";
+
+import Feather from "@expo/vector-icons/Feather";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
@@ -25,6 +31,12 @@ export default function App() {
   const [tempPin, setTempPin] = useState("");
   const [nota, setNota] = useState("");
   const [notas, setNotas] = useState([]);
+  const [itemSelecionado, setItemSelecionado] = useState(null);
+
+  const abrirEdicao = (item) => {
+    setItemSelecionado(item);
+    setNota(item.text); // Preenche o campo com o texto da nota selecionada
+  };
 
   useEffect(() => {
     (async () => {
@@ -57,36 +69,49 @@ export default function App() {
     }
   };
 
-    const clearNotas = () =>{
+  const clearNotas = () => {
     Alert.alert(
       "Limpar tudo",
       "Tem certeza que deseja apagar todas as notas?",
       [
-        {text: "Cancelar", style: "cancel"},
+        { text: "Cancelar", style: "cancel" },
         {
           text: "Apagar",
           style: "destructive",
-          onPress: async () => persistNotas([]), 
-        }
+          onPress: async () => persistNotas([]),
+        },
       ]
+    );
+  };
+
+  const excluirNota = (item) => {
+    Alert.alert(
+      "Excluir Nota",
+      "Tem Certeza que Deseja Excluir essa Nota??",
+      [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => {
+          const novasNotas = notas.filter(n => n.id !== item.id);
+          persistNotas(novasNotas);
+        }
+      }
+    ]
     )
   }
 
-
   const exportBackup = async () => {
     try {
-
       const path = FileSystem.documentDirectory + "notes-backup.json";
-
 
       await FileSystem.writeAsStringAsync(path, JSON.stringify(notas), {
         encoding: FileSystem.EncodingType.UTF8,
       });
 
-
       Alert.alert("Backup criado", `Arquivo salvo em:\n${path}`);
     } catch (_error) {
-
       Alert.alert("Erro", "Falha ao criar backup.");
     }
   };
@@ -95,12 +120,10 @@ export default function App() {
     try {
       const path = FileSystem.documentDirectory + "notes-backup.json";
 
-
       const content = await FileSystem.readAsStringAsync(path);
 
       Alert.alert("Backup encontrado", content);
     } catch (_error) {
- 
       Alert.alert("Erro", "Não foi possível abrir o backup.");
     }
   };
@@ -110,6 +133,18 @@ export default function App() {
     const nova = { id: Date.now().toString(), text };
     persistNotas([nova, ...notas]);
     setNota("");
+    Keyboard.dismiss();
+  };
+
+  const salvarEditNota = () => {
+    const text = nota.trim();
+    if (!text || !itemSelecionado) return;
+    const novasNotas = notas.map((n) =>
+      n.id === itemSelecionado.id ? { ...n, text } : n
+    );
+    persistNotas(novasNotas);
+    setNota("");
+    setItemSelecionado(null);
     Keyboard.dismiss();
   };
 
@@ -154,7 +189,6 @@ export default function App() {
       const savedPin = await SecureStore.getItemAsync(PIN_KEY);
       if (savedPin && code === savedPin) {
         setPinInput("");
-        
       } else {
         Alert.alert("PIN incorreto", "Tente novamente.");
       }
@@ -212,39 +246,61 @@ export default function App() {
           onChangeText={setNota}
           placeholder="Escreva uma nota…"
           returnKeyType="done"
-          onSubmitEditing={addNota}
+          onSubmitEditing={itemSelecionado ? salvarEditNota : addNota}
         />
 
-        <TouchableOpacity style={styles.button} onPress={addNota}>
-          <Text style={styles.buttonText}>+</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={itemSelecionado ? salvarEditNota : addNota}
+        >
+          <Text style={styles.buttonText}>
+            {itemSelecionado ? "Salvar" : "+"}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
         data={notas}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ gap: 8, paddingVertical: 8 }}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text style={styles.cardText}>{item.text}</Text>
+            <Text style={styles.cardText}>{item.text} </Text>
+            <View>
+              <Feather
+                onPress={() => abrirEdicao(item)}
+                style={styles.iconEdit}
+                name="edit-2"
+                size={20}
+                color="white"
+              />
+            </View> 
+            <View>
+              <Feather onPress={() => excluirNota(item)}  style={styles.iconEdit} name="trash" size={20} color="white" />
+            </View>
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.muted}>Nenhuma nota ainda.</Text>
-        }
       />
 
       <View style={styles.actions}>
-        <TouchableOpacity onPress={clearNotas} style={[styles.button, styles.secondary]}>
+        <TouchableOpacity
+          onPress={clearNotas}
+          style={[styles.button, styles.secondary]}
+        >
           <Text style={styles.buttonText}>Limpar Tudo</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity onPress={exportBackup} style={[styles.button, styles.secondary]}>
+
+        <TouchableOpacity
+          onPress={exportBackup}
+          style={[styles.button, styles.secondary]}
+        >
           <Text style={styles.buttonText}>Exportar Backup</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={showBackup} style={[styles.button, styles.secondary]}>
-          <Text style={styles.buttonText}>Exportar Backup</Text>
+        <TouchableOpacity
+          onPress={showBackup}
+          style={[styles.button, styles.secondary]}
+        >
+          <Text style={styles.buttonText}>Mostrar Backup</Text>
         </TouchableOpacity>
       </View>
     </View>
