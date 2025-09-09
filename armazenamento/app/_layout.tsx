@@ -35,7 +35,7 @@ export default function App() {
 
   const abrirEdicao = (item) => {
     setItemSelecionado(item);
-    setNota(item.text); // Preenche o campo com o texto da nota selecionada
+    setNota(item.text);
   };
 
   useEffect(() => {
@@ -85,22 +85,18 @@ export default function App() {
   };
 
   const excluirNota = (item) => {
-    Alert.alert(
-      "Excluir Nota",
-      "Tem Certeza que Deseja Excluir essa Nota??",
-      [
+    Alert.alert("Excluir Nota", "Tem Certeza que Deseja Excluir essa Nota??", [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Excluir",
         style: "destructive",
         onPress: () => {
-          const novasNotas = notas.filter(n => n.id !== item.id);
+          const novasNotas = notas.filter((n) => n.id !== item.id);
           persistNotas(novasNotas);
-        }
-      }
-    ]
-    )
-  }
+        },
+      },
+    ]);
+  };
 
   const exportBackup = async () => {
     try {
@@ -113,6 +109,18 @@ export default function App() {
       Alert.alert("Backup criado", `Arquivo salvo em:\n${path}`);
     } catch (_error) {
       Alert.alert("Erro", "Falha ao criar backup.");
+    }
+  };
+  const importBackup = async () => {
+    try {
+      const path = FileSystem.documentDirectory + "notes-backup.json";
+      const content = await FileSystem.readAsStringAsync(path);
+      const backupNotas = JSON.parse(content);
+
+      await persistNotas(backupNotas);
+      Alert.alert("Importado", "Backup importado com sucesso!");
+    } catch (_error) {
+      Alert.alert("Erro", "Não foi possível importar o backup.");
     }
   };
 
@@ -273,9 +281,15 @@ export default function App() {
                 size={20}
                 color="white"
               />
-            </View> 
+            </View>
             <View>
-              <Feather onPress={() => excluirNota(item)}  style={styles.iconEdit} name="trash" size={20} color="white" />
+              <Feather
+                onPress={() => excluirNota(item)}
+                style={styles.iconEdit}
+                name="trash"
+                size={20}
+                color="white"
+              />
             </View>
           </View>
         )}
@@ -301,6 +315,12 @@ export default function App() {
           style={[styles.button, styles.secondary]}
         >
           <Text style={styles.buttonText}>Mostrar Backup</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={importBackup}
+          style={[styles.button, styles.secondary]}
+        >
+          <Text style={styles.buttonText}>Importar Backup</Text>
         </TouchableOpacity>
       </View>
     </View>
